@@ -118,7 +118,8 @@ Tiger Palm 100780 · Blackout Kick 100784 · Rising Sun Kick 107428 · Spinning 
 | Life Cocoon | 116849 | LIFE_COCOON | 100% | ✓ | 3s | | External defensive (chicacoon.ogg) |
 | Summon Jade Serpent Statue | 115313 | STATUE_SUMMON | 100% | | — | ✓ | mw-bmstatue.ogg |
 | Summon Black Ox Statue | 115315 | STATUE_SUMMON | 100% | | — | ✓ | mw-bmstatue.ogg |
-| Revival | 115310 | REVIVAL_CAST | 100% | ✓ | 3s | | Cast lines (revival + revive_1..5) |
+| Revival | 115310 | REVIVAL_CAST | 100% | | — | ✓ | AoE raid-cooldown rez; on cast start; cast lines (revival.ogg only) |
+| Resuscitate | 115178 | RESUSCITATE_CAST | 100% | | — | ✓ | Single-target out-of-combat rez; on cast start; cast lines (revive_1..5.ogg) |
 | Thunder Focus Tea | 116680 | MAJOR_COOLDOWN | 100% | ✓ | 3s | | Shared bundle file |
 | Celestial Brew | 322507 | MAJOR_COOLDOWN | 100% | ✓ | 3s | | Shared bundle file |
 
@@ -127,8 +128,8 @@ Tiger Palm 100780 · Blackout Kick 100784 · Rising Sun Kick 107428 · Spinning 
 ## Renames applied (per wow-voice-addon skill naming rules)
 
 **Turkish → English translation (then camelCase):**
-- `alancanlandırma.ogg` → `revival.ogg` — "alan canlandırma" = "area revival" (Mistweaver Revival, AoE cooldown).
-- `canlandırma_1..5.ogg` → `revive_1..5.ogg` — "canlandırma" = "revival/resurrection" (voice lines for casting the Revival ability).
+- `alancanlandırma.ogg` → `revival.ogg` — "alan canlandırma" = "area revival" (Mistweaver **Revival**, 115310, AoE cooldown).
+- `canlandırma_1..5.ogg` → `revive_1..5.ogg` — "canlandırma" = "revival/resurrection" (voice lines for casting **Resuscitate**, 115178, single-target out-of-combat rez — distinct spell from Revival above).
 - `canlanma_1..4.ogg` → `revived_1..4.ogg` — "canlanma" = "coming back to life" (ambient REVIVE, distinct from the spell cast above).
 
 **Typo consolidation:**
@@ -150,10 +151,11 @@ All other numbered files (aggro_N, death_N, mount_N, select_N, taunt_N, etc.) al
 
 ---
 
-## REVIVE vs REVIVAL_CAST — do not conflate
+## REVIVE vs REVIVAL_CAST vs RESUSCITATE_CAST — do not conflate
 
 - **REVIVE** (ambient, `force = true`) — `revived_1..4.ogg`. Fires from the OnUpdate poll when the player transitions from dead to alive (`UnitIsDeadOrGhost` false after being true). This is "your character coming back to life."
-- **REVIVAL_CAST** (spell) — `revival.ogg` + `revive_1..5.ogg`. Fires on `UNIT_SPELLCAST_SUCCEEDED` for the Mistweaver **Revival** ability (115310). This is "your character casting the Revival cooldown."
+- **REVIVAL_CAST** (spell 115310, Revival) — `revival.ogg` only. Fires on `UNIT_SPELLCAST_START` for the Mistweaver **Revival** AoE raid-cooldown rez. "alan canlandırma" = area revival.
+- **RESUSCITATE_CAST** (spell 115178, Resuscitate) — `revive_1..5.ogg`. Fires on `UNIT_SPELLCAST_START` for the Mistweaver **Resuscitate** single-target, out-of-combat rez. These generic "canlandırma" lines (no "alan"/area qualifier) were previously lumped into REVIVAL_CAST alongside revival.ogg with no spell mapping of their own — split out so Revival and Resuscitate no longer share a bucket.
 
 ---
 

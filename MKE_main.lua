@@ -209,8 +209,8 @@ MKE_Sounds = {
     MANA_TEA      = { {"manatea_1.ogg", 1}, {"manatea_2.ogg", 1} },
     LIFE_COCOON   = { {"chicacoon.ogg", 1} },
     STATUE_SUMMON = { {"mw-bmstatue.ogg", 1} },
-    REVIVAL_CAST  = { -- casting the Revival ability (revival + revive_1..5)
-        {"revival.ogg", 1},
+    REVIVAL_CAST     = { {"revival.ogg", 1} }, -- Revival: the AoE raid-cooldown resurrection
+    RESUSCITATE_CAST = { -- Resuscitate: single-target out-of-combat resurrection
         {"revive_1.ogg", 1}, {"revive_2.ogg", 1}, {"revive_3.ogg", 1},
         {"revive_4.ogg", 1}, {"revive_5.ogg", 1},
     },
@@ -284,7 +284,8 @@ local SpellToSound = {
     [197908] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true },
     [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Life Cocoon
     [115313] = { cat = "STATUE_SUMMON", prob = 1.0, anyCombat = true }, -- Summon Jade Serpent Statue
-    [115310] = { cat = "REVIVAL_CAST",  prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival (plays when cast begins)
+    [115310] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival, AoE (plays when cast begins)
+    [115178] = { cat = "RESUSCITATE_CAST", prob = 1.0, anyCombat = true, onCastStart = true }, -- Resuscitate, single-target (plays when cast begins)
 
     -- Shared major-cooldown bundle
     [116680] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Thunder Focus Tea
