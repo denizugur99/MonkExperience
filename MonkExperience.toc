@@ -1,0 +1,11 @@
+## Interface: 120001
+## Interface-Retail: 120001
+## Title: |cff00FF98Monk|r|cff4DB891 |r|cff00C0A3Experience|r
+## Notes: Monk class voice pack — plays character voice lines on spells and events
+## Author: Deniz Ugur
+## Version: 1.0.0
+## SavedVariables: MKE_settings
+## IconAtlas: classicon-monk
+## DefaultState: enabled
+
+MKE_main.lua
