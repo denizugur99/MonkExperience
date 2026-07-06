@@ -154,7 +154,7 @@ MKE_Sounds = {
     -- Spell categories
     TIGER_PALM            = { {"tigerpalm.ogg", 1} },
     BLACKOUT_KICK         = { {"blackoutkick.ogg", 1} },
-    RISING_SUN_KICK       = { {"risingsunkickcrit.ogg", 1} },
+    
     SPINNING_CRANE_KICK   = { {"spinningcranekick.ogg", 1} },
     FISTS_OF_FURY         = { {"fistoffury_1.ogg", 1}, {"fistoffury_2.ogg", 1} },
     CRACKLING_JADE        = { {"cracklingjadelightning.ogg", 1} },
@@ -227,12 +227,12 @@ local SpellToSound = {
     -- Core rotational
     [100780] = { cat = "TIGER_PALM",          prob = 0.25, anyCombat = true },
     [100784] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true },
-    [107428] = { cat = "RISING_SUN_KICK",     prob = 1.0, anyCombat = true },
-    [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.4, anyCombat = true },
-    [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, protect = 2, anyCombat = true },
-    [117952] = { cat = "CRACKLING_JADE",      prob = 0.5, anyCombat = true },
+
+    [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.25, anyCombat = true },
+    [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, anyCombat = true },
+    [117952] = { cat = "CRACKLING_JADE",      prob = 1.0, anyCombat = true },
     [123986] = { cat = "CHI_BURST",           prob = 1.0, anyCombat = true },
-    [467307] = { cat = "RUSHING_WIND_KICK",   prob = 1.0, probBySpec = { [270] = 0.3 }, anyCombat = true }, -- full chance on Windwalker, lower on Mistweaver
+    [467307] = { cat = "RUSHING_WIND_KICK",   prob = 1.0,protect=2, probBySpec = { [270] = 0.3 }, anyCombat = true }, -- full chance on Windwalker, lower on Mistweaver
 
     -- Windwalker cooldowns / signatures
     [322109] = { cat = "TOUCH_OF_DEATH",   prob = 1.0, force = true, protect = 3, anyCombat = true },
@@ -252,8 +252,8 @@ local SpellToSound = {
     [132578] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true, protect = 3 }, -- Invoke Niuzao
 
     -- Movement / utility
-    [109132] = { cat = "ROLL",           prob = 0.5, anyCombat = true }, -- Roll
-    [115008] = { cat = "CHI_TORPEDO",    prob = 0.6, anyCombat = true }, -- Chi Torpedo
+    [109132] = { cat = "ROLL",           prob = 1.0, anyCombat = true }, -- Roll
+    [115008] = { cat = "CHI_TORPEDO",    prob = 1.0, anyCombat = true }, -- Chi Torpedo
     [116841] = { cat = "TIGERS_LUST",    prob = 1.0, anyCombat = true }, -- Tiger's Lust
     [101643] = { cat = "TRANSCENDENCE",  prob = 1.0, anyCombat = true }, -- Transcendence
     [119996] = { cat = "TRANS_TRANSFER", prob = 1.0, anyCombat = true }, -- Transcendence: Transfer
@@ -263,28 +263,28 @@ local SpellToSound = {
     [115078] = { cat = "PARALYSIS",     prob = 1.0, anyCombat = true },
     [119381] = { cat = "LEG_SWEEP",     prob = 1.0, anyCombat = true },
     [116844] = { cat = "RING_OF_PEACE", prob = 1.0, anyCombat = true },
-    [116095] = { cat = "DISABLE",       prob = 0.5, anyCombat = true },
+    [116095] = { cat = "DISABLE",       prob = 1.0, anyCombat = true },
     [218164] = { cat = "DETOX",         prob = 1.0, anyCombat = true },
-    [322101] = { cat = "EXPEL_HARM",    prob = 0.3, anyCombat = true },
+    [322101] = { cat = "EXPEL_HARM",    prob = 1.0, anyCombat = true },
     [115546] = { cat = "TAUNT",         prob = 1.0, anyCombat = true }, -- Provoke
     [116705] = { cat = "INTERRUPT",     prob = 1.0, anyCombat = true }, -- Spear Hand Strike (success)
 
     -- Brewmaster
-    [121253] = { cat = "KEG_SMASH",       prob = 0.4, anyCombat = true },
-    [115181] = { cat = "BREATH_OF_FIRE",  prob = 0.6, anyCombat = true },
-    [119582] = { cat = "PURIFYING_BREW",  prob = 0.5, anyCombat = true },
+    [121253] = { cat = "KEG_SMASH",       prob = 0.25, anyCombat = true },
+    [115181] = { cat = "BREATH_OF_FIRE",  prob = 0.25, anyCombat = true },
+    [119582] = { cat = "PURIFYING_BREW",  prob = 1.0, anyCombat = true },
     [115203] = { cat = "FORTIFYING_BREW", prob = 1.0, force = true, protect = 3, anyCombat = true },
     [115399] = { cat = "BLACK_OX_BREW",   prob = 1.0, anyCombat = true },
     [325153] = { cat = "EXPLODING_KEG",   prob = 1.0, anyCombat = true },
     [115315] = { cat = "STATUE_SUMMON",   prob = 1.0, anyCombat = true }, -- Summon Black Ox Statue
 
     -- Mistweaver
-    [115151] = { cat = "RENEWING_MIST", prob = 0.4, anyCombat = true },
-    [115175] = { cat = "SOOTHING_MIST", prob = 0.4, anyCombat = true },
-    [197908] = { cat = "MANA_TEA",      prob = 0.6, anyCombat = true },
+    [115151] = { cat = "RENEWING_MIST", prob = 0.25, anyCombat = true },
+    [115175] = { cat = "SOOTHING_MIST", prob = 1.0, anyCombat = true },
+    [197908] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true },
     [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Life Cocoon
     [115313] = { cat = "STATUE_SUMMON", prob = 1.0, anyCombat = true }, -- Summon Jade Serpent Statue
-    [115310] = { cat = "REVIVAL_CAST",  prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Revival
+    [115310] = { cat = "REVIVAL_CAST",  prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival (plays when cast begins)
 
     -- Shared major-cooldown bundle
     [116680] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Thunder Focus Tea
@@ -472,9 +472,9 @@ frame:SetScript("OnUpdate", function(_, elapsed)
 end)
 
 -- ===========================================================================
--- Slash command: /mke on | off | debug | cd <seconds>
+-- Slash command: /vgm on | off | debug | cd <seconds>
 -- ===========================================================================
-SLASH_MKE1 = "/mke"
+SLASH_MKE1 = "/vgm"
 SlashCmdList["MKE"] = function(msg)
     local cmd, arg = msg:match("^(%S+)%s*(.*)$")
     if not cmd then cmd = "" end
@@ -499,13 +499,13 @@ SlashCmdList["MKE"] = function(msg)
             MKE_settings.globalCD = val
             print("|cff00C0A3Monk Experience:|r Global cooldown set to |cffFFFF00" .. val .. "|r seconds.")
         else
-            print("|cff00C0A3Monk Experience:|r Usage: /mke cd <seconds>")
+            print("|cff00C0A3Monk Experience:|r Usage: /vgm cd <seconds>")
         end
     else
         print("|cff00C0A3Monk Experience:|r Commands:")
-        print("  /mke on    — enable sounds")
-        print("  /mke off   — disable sounds")
-        print("  /mke debug — toggle debug output")
-        print("  /mke cd <seconds> — set global cooldown between sounds")
+        print("  /vgm on    — enable sounds")
+        print("  /vgm off   — disable sounds")
+        print("  /vgm debug — toggle debug output")
+        print("  /vgm cd <seconds> — set global cooldown between sounds")
     end
 end
