@@ -369,8 +369,10 @@ local function PlayAFKStart()
 
     afkMusicTimer = C_Timer.NewTimer(AFK_STINGER_DURATION, function()
         afkMusicTimer = nil
-        local ok2, isAFK = pcall(UnitIsAFK, "player")
-        if ok2 and isAFK then
+        local ok2, shouldPlay = pcall(function()
+            return UnitIsAFK("player") and true or false
+        end)
+        if ok2 and shouldPlay then
             PlayAFKMusic()
         end
     end)
@@ -444,12 +446,20 @@ frame:SetScript("OnUpdate", function(_, elapsed)
     prevMounted = mounted
 
     -- AFK
-    local ok, isAFK = pcall(UnitIsAFK, "player")
-    if not ok then isAFK = false end
-    if isAFK and not prevAFK then
+    local okAFK, afkEvent = pcall(function()
+        local isAFK = UnitIsAFK("player")
+        if isAFK and not prevAFK then
+            prevAFK = true
+            return "AFKSTART"
+        elseif not isAFK and prevAFK then
+            prevAFK = false
+            return "AFKEND"
+        end
+    end)
+    if okAFK and afkEvent == "AFKSTART" then
         MKE_Debug("state: AFK START")
         PlayAFKStart()
-    elseif not isAFK and prevAFK then
+    elseif okAFK and afkEvent == "AFKEND" then
         MKE_Debug("state: AFK END")
         if afkMusicTimer then
             afkMusicTimer:Cancel()
@@ -461,7 +471,6 @@ frame:SetScript("OnUpdate", function(_, elapsed)
         end
         PlayRandom("AFK_END", true)
     end
-    prevAFK = isAFK
 
     -- Self-target
     local selfTarget = UnitExists("target") and UnitIsUnit("target", "player")
