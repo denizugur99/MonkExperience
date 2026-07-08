@@ -299,6 +299,7 @@ local SpellToSound = {
     [115151] = { cat = "RENEWING_MIST", prob = 0.25, anyCombat = true, lowPriority = true },
     [115175] = { cat = "SOOTHING_MIST", prob = 1.0, anyCombat = true },
     [197908] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true },
+    [115294] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true, onCastStart = true }, -- Mana Tea, plays on cast start
     [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, anyCombat = true }, -- Life Cocoon; protect is now dynamic (per-file)
     [115313] = { cat = "STATUE_SUMMON", prob = 1.0, anyCombat = true }, -- Summon Jade Serpent Statue
     [115310] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival, AoE (plays when cast begins)
