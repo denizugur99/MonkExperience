@@ -18,6 +18,7 @@ local MKE_lastSoundTime = 0
 local MKE_playLock = 0
 local MKE_currentHandle  = nil
 local MKE_currentIsForce = false
+local MKE_currentIsLowPriority = false
 
 local function CanPlay()
     local now = GetTime()
@@ -67,7 +68,7 @@ local function RollSound(sounds, category)
     return chosen, chosenProtect
 end
 
-local function PlayRandom(category, force, protectDuration)
+local function PlayRandom(category, force, protectDuration, lowPriority)
     if not MKE_soundEnabled then return end
     local now = GetTime()
 
@@ -92,10 +93,17 @@ local function PlayRandom(category, force, protectDuration)
     MKE_lastPlayed[category] = chosen
 
     -- Force: stop whatever is playing and clear the protect lock.
-    -- Non-force: only stop another non-force sound.
+    -- Low-priority (spammy fillers like Tiger Palm/Blackout Kick): never cuts
+    -- anything except another low-priority sound — so it can't interrupt
+    -- Leg Sweep etc., but two fillers still cut each other like force does.
+    -- Normal (non-force, non-low-priority): cuts any other non-force sound.
     if force then
         if MKE_currentHandle then pcall(StopSound, MKE_currentHandle) end
         MKE_playLock = 0
+    elseif lowPriority then
+        if MKE_currentIsLowPriority and MKE_currentHandle then
+            pcall(StopSound, MKE_currentHandle)
+        end
     elseif not MKE_currentIsForce and MKE_currentHandle then
         pcall(StopSound, MKE_currentHandle)
     end
@@ -104,6 +112,7 @@ local function PlayRandom(category, force, protectDuration)
     local ok, success, handle = pcall(PlaySoundFile, ADDON_PATH .. chosen, "Dialog")
     MKE_currentHandle  = (ok and success) and handle or nil
     MKE_currentIsForce = force or false
+    MKE_currentIsLowPriority = (not force) and lowPriority or false
     local effectiveProtect = chosenProtect or protectDuration
     if effectiveProtect then MKE_playLock = now + effectiveProtect end
 end
@@ -113,7 +122,7 @@ end
 -- ===========================================================================
 MKE_Sounds = {
     -- Ambient
-    LOGIN       = { {"login.ogg", 1, 10} },
+    LOGIN       = { {"login_1.ogg", 1, 11.2} }, -- protect = own runtime + buffer
     SELECT      = {
         {"select_1.ogg", 1}, {"select_2.ogg", 1}, {"select_3.ogg", 1},
         {"select_4.ogg", 1}, {"select_5.ogg", 1}, {"select_6.ogg", 1},
@@ -123,100 +132,103 @@ MKE_Sounds = {
     },
     AGGRO       = {
         {"aggro_1.ogg", 1}, {"aggro_2.ogg", 1}, {"aggro_3.ogg", 1},
-        {"aggro_5.ogg", 1}, {"aggro_6.ogg", 1}, {"aggro_7.ogg", 1},
-        {"aggro_8.ogg", 1},
+        {"aggro_4.ogg", 1}, {"aggro_5.ogg", 1}, {"aggro_6.ogg", 1},
     },
     LEAVECOMBAT = {
         {"leavecombat_1.ogg", 1}, {"leavecombat_2.ogg", 1}, {"leavecombat_3.ogg", 1},
         {"leavecombat_4.ogg", 1}, {"leavecombat_5.ogg", 1},
     },
     DEATH       = {
-        {"death_1.ogg", 1}, {"death_2.ogg", 1}, {"death_3.ogg", 1},
-        {"death_4.ogg", 1}, {"death_5.ogg", 1},
+        {"death_1.ogg", 1}, {"death_2.ogg", 1},
     },
     REVIVE      = { -- ambient: player coming back to life (canlanma → revived)
-        {"revived_1.ogg", 1}, {"revived_2.ogg", 1},
-        {"revived_3.ogg", 1}, {"revived_4.ogg", 1},
+        -- protect (3rd value) = each file's own runtime + small buffer, so it always plays out in full
+        {"revived_1.ogg", 1, 1.6}, {"revived_2.ogg", 1, 4.6},
+        {"revived_3.ogg", 1, 3.1},
     },
     MOUNT       = {
-        {"mount_1.ogg", 1}, {"mount_2.ogg", 1}, {"mount_3.ogg", 1},
-        {"mount_4.ogg", 1}, {"mount_5.ogg", 1}, {"mount_6.ogg", 1},
-        {"mount_7.ogg", 1}, {"mount_8.ogg", 1}, {"mount_9.ogg", 1},
-        {"mount_10.ogg", 1}, {"mount_11.ogg", 1}, {"mount_12.ogg", 1},
+        {"mount_1.ogg", 1}, {"mount_3.ogg", 1}, {"mount_4.ogg", 1},
+        {"mount_5.ogg", 1}, {"mount_6.ogg", 1}, {"mount_7.ogg", 1},
+        {"mount_8.ogg", 1}, {"mount_9.ogg", 1}, {"mount_10.ogg", 1},
+        {"mount_11.ogg", 1}, {"mount_12.ogg", 1},
     },
-    AFK_START   = { {"afkstart.ogg", 1} }, -- stinger, always plays first
+    AFK_START   = { {"afkstart_1.ogg", 1} }, -- stinger, always plays first
     AFK_MUSIC   = { -- random music bed, plays right after the stinger
         {"afkmusic_1.mp3", 1}, {"afkmusic_2.mp3", 1}, {"afkmusic_3.mp3", 1},
         {"afkmusic_4.mp3", 1}, {"afkmusic_5.mp3", 1},
     },
-    AFK_END     = { {"afkend.ogg", 1} },
+    AFK_END     = { {"afkend_1.ogg", 1} },
 
     -- Spell categories
-    TIGER_PALM            = { {"tigerpalm.ogg", 1} },
-    BLACKOUT_KICK         = { {"blackoutkick.ogg", 1} },
-    
-    SPINNING_CRANE_KICK   = { {"spinningcranekick.ogg", 1} },
-    FISTS_OF_FURY         = { {"fistoffury_1.ogg", 1}, {"fistoffury_2.ogg", 1} },
-    CRACKLING_JADE        = { {"cracklingjadelightning.ogg", 1} },
-    CHI_BURST             = { {"chiburst.ogg", 1} },
-    TOUCH_OF_DEATH        = { {"touchofdeath_1.ogg", 1}, {"touchofdeath_2.ogg", 1}, {"touchofdeath_3.ogg", 1} },
-    TOUCH_OF_KARMA        = { {"touchofkarma.ogg", 1} },
-    RUSHING_WIND_KICK     = { {"rushingwindkick.ogg", 1} },
-    STRIKES               = { {"sowl-wdp.ogg", 1} }, -- Strike of the Windlord + Whirling Dragon Punch
-    ZENITH                = { {"zenith.ogg", 1} },
-    ZENITH_STOMP          = { {"zenithstomp.ogg", 1} },
-    CELESTIAL_CONDUIT     = { {"celestialconduit.ogg", 1} },
-    CELESTIAL_SUMMON      = { {"chiji-yulon-blackox-whitetiger_1.ogg", 1}, {"chiji-yulon-blackox-whitetiger_2.ogg", 1} },
-    FLYING_SERPENT_KICK   = { {"flyingserpentkick-slicingwinds.ogg", 1} },
+    TIGER_PALM            = { {"tigerpalm_1.ogg", 1} },
+    BLACKOUT_KICK         = { {"blackoutkick_1.ogg", 1} },
+    RISING_SUN_KICK       = { {"risingsunkick_1.ogg", 1} },
+    SPINNING_CRANE_KICK   = { {"spinningcranekick_1.ogg", 1} },
+    FISTS_OF_FURY         = { {"fistsoffury_1.ogg", 1} },
+    CRACKLING_JADE        = { {"cracklingjadelightning_1.ogg", 1} },
+    CHI_BURST             = { {"chiburst_1.ogg", 1} },
+    TOUCH_OF_DEATH        = { -- protect (3rd value) = each file's own runtime + small buffer
+        {"touchofdeath_1.ogg", 1, 1.5}, {"touchofdeath_2.ogg", 1, 1.4}, {"touchofdeath_3.ogg", 1, 3.8},
+    },
+    TOUCH_OF_KARMA        = { {"touchofkarma_1.ogg", 1} },
+    RUSHING_WIND_KICK     = { {"rushingwindkick_1.ogg", 1, 1.5} }, -- protect = own runtime + buffer
+    STRIKES               = { {"sowl-wdp_1.ogg", 1} }, -- Strike of the Windlord + Whirling Dragon Punch
+    ZENITH                = { {"zenith_1.ogg", 1, 2.7} }, -- protect = own runtime + buffer
+    ZENITH_STOMP          = { {"zenitstomp_1.ogg", 1}, {"zenithstomp_2.ogg", 1} },
+    CELESTIAL_CONDUIT     = { {"celestialconduit_1.ogg", 1, 4.9} }, -- protect = own runtime + buffer
+    CELESTIAL_SUMMON      = { {"chiji-yulon-blackox-whitetiger_1.ogg", 1, 2.1} }, -- protect = own runtime + buffer
+    FLYING_SERPENT_KICK   = { {"flyingserpentkick-slicingwinds_1.ogg", 1} },
+    GRAPPLE_WEAPON        = { {"grappleweapon_1.ogg", 1} },
 
     -- Movement / utility (out of combat)
-    ROLL          = { {"roll.ogg", 1}, {"lighterthanair.ogg", 1} },
-    CHI_TORPEDO   = { {"chitorpedo.ogg", 1} },
-    TIGERS_LUST   = { {"tigerslust_1.ogg", 1}, {"tigerslust_2.ogg", 1} },
-    TRANSCENDENCE = { {"transcendence.ogg", 1} },
-    TRANS_TRANSFER = { {"transcendenceTeleport.ogg", 1} },
-    ZEN_FLIGHT    = { {"zenflight.ogg", 1} },
+    ROLL          = { {"roll_1.ogg", 1} },
+    CHI_TORPEDO   = { {"chitorpedo_1.ogg", 1} },
+    TIGERS_LUST   = { {"tigerslust_1.ogg", 1} },
+    TRANSCENDENCE = { {"transcendence_1.ogg", 1} },
+    TRANS_TRANSFER = { {"transcendenceTeleport_1.ogg", 1} },
+    ZEN_FLIGHT    = { {"zenflight_1.ogg", 1} },
 
     -- Control / utility
-    PARALYSIS   = { {"paralysis.ogg", 1} },
-    LEG_SWEEP   = { {"legsweep.ogg", 1} },
-    RING_OF_PEACE = { {"ringofpeace.ogg", 1} },
-    DISABLE     = { {"disable_2.ogg", 1} },
-    DETOX       = { {"detox.ogg", 1} },
-    EXPEL_HARM  = { {"expelharm.ogg", 1} },
+    PARALYSIS   = { {"paralysis_1.ogg", 1} },
+    LEG_SWEEP   = { {"legsweep_1.ogg", 1}, {"legsweep_2.ogg", 1} },
+    RING_OF_PEACE = { {"ringofpeace_1.ogg", 1} },
+    DISABLE     = { {"disable_1.ogg", 1} },
+    DETOX       = { {"detox_1.ogg", 1} },
+    EXPEL_HARM  = { {"expelharm_1.ogg", 1} },
     TAUNT       = {
         {"taunt_1.ogg", 1}, {"taunt_2.ogg", 1}, {"taunt_3.ogg", 1},
         {"taunt_4.ogg", 1}, {"taunt_5.ogg", 1}, {"taunt_6.ogg", 1},
         {"taunt_7.ogg", 1},
     },
-    INTERRUPT   = { -- Spear Hand Strike (+ disarm.ogg folded in: no Monk disarm exists)
+    INTERRUPT   = { -- Spear Hand Strike
         {"interrupt_1.ogg", 1}, {"interrupt_2.ogg", 1}, {"interrupt_3.ogg", 1},
-        {"interrupt_4.ogg", 1}, {"disarm.ogg", 1},
+        {"interrupt_4.ogg", 1},
     },
     INTERRUPT_FAIL = { {"interruptfail_1.ogg", 1}, {"interruptfail_2.ogg", 1} },
 
     -- Brewmaster
-    KEG_SMASH      = { {"kegsmash.ogg", 1} },
-    BREATH_OF_FIRE = { {"breathoffire.ogg", 1} },
+    KEG_SMASH      = { {"kegsmash_1.ogg", 1} },
+    BREATH_OF_FIRE = { {"breathoffire_1.ogg", 1} },
     PURIFYING_BREW = { {"purifyingbrew_1.ogg", 1}, {"purifyingbrew_2.ogg", 1}, {"purifyingbrew_3.ogg", 1} },
-    FORTIFYING_BREW = { {"fortifyingbrew_1.ogg", 1}, {"fortifyingbrew_2.ogg", 1}, {"fortifyingbrew_3.ogg", 1} },
+    FORTIFYING_BREW = { {"fortifyingbrew_1.ogg", 1, 2.5} }, -- protect = own runtime + buffer
     BLACK_OX_BREW  = { {"blackoxbrew_1.ogg", 1} },
     EXPLODING_KEG  = { {"explodingkeg_1.ogg", 1}, {"explodingkeg_2.ogg", 1} },
 
     -- Mistweaver
     RENEWING_MIST = { {"renewingmist_1.ogg", 1}, {"renewingmist_2.ogg", 1} },
-    SOOTHING_MIST = { {"soothingmist.ogg", 1} },
+    SOOTHING_MIST = { {"soothingmist_1.ogg", 1}, {"soothingmist_2.ogg", 1} },
     MANA_TEA      = { {"manatea_1.ogg", 1}, {"manatea_2.ogg", 1} },
-    LIFE_COCOON   = { {"chicacoon.ogg", 1} },
-    STATUE_SUMMON = { {"mw-bmstatue.ogg", 1} },
-    REVIVAL_CAST     = { {"revival.ogg", 1} }, -- Revival: the AoE raid-cooldown resurrection
+    LIFE_COCOON   = { {"chicacoon_1.ogg", 1, 2.6} }, -- protect = own runtime + buffer
+    STATUE_SUMMON = { {"mw-bmstatue_1.ogg", 1} },
+    REVIVAL_CAST     = { {"revival-restoral_1.ogg", 1} }, -- Revival + Restoral: the AoE raid-cooldown resurrection
     RESUSCITATE_CAST = { -- Resuscitate: single-target out-of-combat resurrection
-        {"revive_1.ogg", 1}, {"revive_2.ogg", 1}, {"revive_3.ogg", 1},
-        {"revive_4.ogg", 1}, {"revive_5.ogg", 1},
+        {"resuscitate_1.ogg", 1}, {"resuscitate_2.ogg", 1}, {"resuscitate_3.ogg", 1},
+        {"resuscitate_4.ogg", 1}, {"resuscitate_5.ogg", 1},
     },
+    REAWAKEN = { {"reawaken_1.ogg", 1} }, -- mass out-of-combat resurrection
 
     -- Shared major-cooldown bundle: Thunder Focus Tea + Celestial Brew
-    MAJOR_COOLDOWN = { {"thunderfocustea-celestialinfusion-celestialbrew.ogg", 1} },
+    MAJOR_COOLDOWN = { {"thunderfocustea-celestialinfusion-celestialbrew_1.ogg", 1, 2.6} }, -- protect = own runtime + buffer
 }
 
 -- ===========================================================================
@@ -225,31 +237,32 @@ MKE_Sounds = {
 -- ===========================================================================
 local SpellToSound = {
     -- Core rotational
-    [100780] = { cat = "TIGER_PALM",          prob = 0.25, anyCombat = true },
-    [100784] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true },
-
-    [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.25, anyCombat = true },
-    [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, anyCombat = true },
-    [117952] = { cat = "CRACKLING_JADE",      prob = 1.0, anyCombat = true },
-    [123986] = { cat = "CHI_BURST",           prob = 1.0, anyCombat = true },
-    [467307] = { cat = "RUSHING_WIND_KICK",   prob = 1.0,protect=2, probBySpec = { [270] = 0.3 }, anyCombat = true }, -- full chance on Windwalker, lower on Mistweaver
+    [100780] = { cat = "TIGER_PALM",          prob = 0.25, anyCombat = true, lowPriority = true },
+    [100784] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true, lowPriority = true },
+    [107428] = { cat = "RISING_SUN_KICK",     prob = 0.25 , anyCombat = true , lowPriority = true },
+    [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.25, anyCombat = true, lowPriority = true },
+    [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, anyCombat = true ,lowPriority = true},
+    [117952] = { cat = "CRACKLING_JADE",      prob = 1.0, anyCombat = true, lowPriority = true },
+    [123986] = { cat = "CHI_BURST",           prob = 1.0, anyCombat = true , onCastStart = true  },
+    [467307] = { cat = "RUSHING_WIND_KICK",   prob = 1.0, probBySpec = { [270] = 0.3 }, anyCombat = true, lowPriority = true }, -- full chance on Windwalker, lower on Mistweaver; protect is now dynamic (per-file)
 
     -- Windwalker cooldowns / signatures
-    [322109] = { cat = "TOUCH_OF_DEATH",   prob = 1.0, force = true, protect = 3, anyCombat = true },
+    [322109] = { cat = "TOUCH_OF_DEATH",   prob = 1.0, force = true, anyCombat = true }, -- protect is now dynamic (per-file)
     [122470] = { cat = "TOUCH_OF_KARMA",   prob = 1.0, anyCombat = true },
     [392983] = { cat = "STRIKES",          prob = 1.0, anyCombat = true }, -- Strike of the Windlord
     [152175] = { cat = "STRIKES",          prob = 1.0, anyCombat = true }, -- Whirling Dragon Punch
-    [1249625] = { cat = "ZENITH",          prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Zenith (Shado-Pan)
+    [1249625] = { cat = "ZENITH",          prob = 1.0, force = true, anyCombat = true }, -- Zenith (Shado-Pan); protect is now dynamic (per-file)
     [1272696] = { cat = "ZENITH_STOMP",    prob = 1.0, anyCombat = true }, -- Zenith Stomp (may be an auto-proc; see notes)
-    [443028] = { cat = "CELESTIAL_CONDUIT", prob = 1.0, force = true, protect = 3, anyCombat = true },
+    [443028] = { cat = "CELESTIAL_CONDUIT", prob = 1.0, force = true, anyCombat = true }, -- protect is now dynamic (per-file)
     [101545] = { cat = "FLYING_SERPENT_KICK", prob = 1.0, anyCombat = true }, -- Flying Serpent Kick
     [1217413] = { cat = "FLYING_SERPENT_KICK", prob = 1.0, anyCombat = true }, -- Slicing Winds
+    [233759] = { cat = "GRAPPLE_WEAPON", prob = 1.0, anyCombat = true }, -- Grapple Weapon (PvP talent, disarm-like)
 
-    -- Celestial summons (all specs) — force major cooldowns
-    [123904] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true, protect = 3 }, -- Invoke Xuen
-    [322118] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true, protect = 3 }, -- Invoke Yu'lon
-    [325197] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true, protect = 3 }, -- Invoke Chi-Ji
-    [132578] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true, protect = 3 }, -- Invoke Niuzao
+    -- Celestial summons (all specs) — force major cooldowns; protect is now dynamic (per-file)
+    [123904] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true }, -- Invoke Xuen
+    [322118] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true }, -- Invoke Yu'lon
+    [325197] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true }, -- Invoke Chi-Ji
+    [132578] = { cat = "CELESTIAL_SUMMON", prob = 1.0, force = true, anyCombat = true }, -- Invoke Niuzao
 
     -- Movement / utility
     [109132] = { cat = "ROLL",           prob = 1.0, anyCombat = true }, -- Roll
@@ -270,32 +283,37 @@ local SpellToSound = {
     [116705] = { cat = "INTERRUPT",     prob = 1.0, anyCombat = true }, -- Spear Hand Strike (success)
 
     -- Brewmaster
-    [121253] = { cat = "KEG_SMASH",       prob = 0.25, anyCombat = true },
-    [115181] = { cat = "BREATH_OF_FIRE",  prob = 0.25, anyCombat = true },
+    [121253] = { cat = "KEG_SMASH",       prob = 0.25, anyCombat = true, lowPriority = true },
+    [115181] = { cat = "BREATH_OF_FIRE",  prob = 0.25, anyCombat = true, lowPriority = true },
     [119582] = { cat = "PURIFYING_BREW",  prob = 1.0, anyCombat = true },
-    [115203] = { cat = "FORTIFYING_BREW", prob = 1.0, force = true, protect = 3, anyCombat = true },
+    [115203] = { cat = "FORTIFYING_BREW", prob = 1.0, force = true, anyCombat = true }, -- protect is now dynamic (per-file)
     [115399] = { cat = "BLACK_OX_BREW",   prob = 1.0, anyCombat = true },
     [325153] = { cat = "EXPLODING_KEG",   prob = 1.0, anyCombat = true },
     [115315] = { cat = "STATUE_SUMMON",   prob = 1.0, anyCombat = true }, -- Summon Black Ox Statue
 
     -- Mistweaver
-    [115151] = { cat = "RENEWING_MIST", prob = 0.25, anyCombat = true },
+    [115151] = { cat = "RENEWING_MIST", prob = 0.25, anyCombat = true, lowPriority = true },
     [115175] = { cat = "SOOTHING_MIST", prob = 1.0, anyCombat = true },
     [197908] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true },
-    [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Life Cocoon
+    [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, anyCombat = true }, -- Life Cocoon; protect is now dynamic (per-file)
     [115313] = { cat = "STATUE_SUMMON", prob = 1.0, anyCombat = true }, -- Summon Jade Serpent Statue
     [115310] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival, AoE (plays when cast begins)
+    [388615] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Restoral, shares Revival's file/bucket
     [115178] = { cat = "RESUSCITATE_CAST", prob = 1.0, anyCombat = true, onCastStart = true }, -- Resuscitate, single-target (plays when cast begins)
+    [212051] = { cat = "REAWAKEN",         prob = 1.0, anyCombat = true, onCastStart = true }, -- Reawaken, mass out-of-combat rez
 
-    -- Shared major-cooldown bundle
-    [116680] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Thunder Focus Tea
-    [322507] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, protect = 3, anyCombat = true }, -- Celestial Brew
+    -- Shared major-cooldown bundle; protect is now dynamic (per-file)
+    [116680] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Thunder Focus Tea
+    [322507] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Celestial Brew
 }
 
 -- Spell IDs whose FAILED/INTERRUPTED cast should trigger an interrupt-miss line.
 local InterruptFailSpells = {
     [116705] = true, -- Spear Hand Strike
 }
+
+local INTERRUPT_FAIL_CD = 5 -- own cooldown, independent of the protect-lock system
+local interruptFailLastPlayed = 0
 
 -- Monk spec IDs: 268 Brewmaster, 270 Mistweaver, 269 Windwalker
 local function CurrentSpecID()
@@ -330,7 +348,7 @@ local function HandleResolvedSpell(spellID, fromCastStart)
         return
     end
     MKE_Debug("spell=" .. tostring(spellID) .. " → " .. cfg.cat)
-    PlayRandom(cfg.cat, cfg.force, cfg.protect)
+    PlayRandom(cfg.cat, cfg.force, cfg.protect, cfg.lowPriority)
 end
 
 -- ===========================================================================
@@ -346,7 +364,7 @@ local afkMusicTimer  = nil
 local pollTimer      = 0
 local POLL           = 0.2
 
-local AFK_STINGER_DURATION = 3.8 -- afkstart.ogg runtime (~3.76s) + small buffer
+local AFK_STINGER_DURATION = 3.8 -- afkstart_1.ogg runtime (~3.76s) + small buffer
 
 local function PlayAFKMusic()
     if not MKE_soundEnabled then return end
@@ -404,8 +422,14 @@ frame:SetScript("OnEvent", function(_, event, ...)
     elseif event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_INTERRUPTED" then
         local unit, _, spellID = ...
         if unit == "player" and InterruptFailSpells[spellID] then
-            MKE_Debug("interrupt miss: spellID=" .. tostring(spellID))
-            PlayRandom("INTERRUPT_FAIL")
+            local now = GetTime()
+            if now - interruptFailLastPlayed >= INTERRUPT_FAIL_CD then
+                interruptFailLastPlayed = now
+                MKE_Debug("interrupt miss: spellID=" .. tostring(spellID))
+                PlayRandom("INTERRUPT_FAIL", nil, nil, true)
+            else
+                MKE_Debug("interrupt miss: spellID=" .. tostring(spellID) .. " blocked (own 5s CD)")
+            end
         end
     end
 end)
