@@ -20,6 +20,14 @@ local MKE_currentHandle  = nil
 local MKE_currentIsForce = false
 local MKE_currentIsLowPriority = false
 
+-- Separate from MKE_playLock: a short grace window after ANY force/normal
+-- sound starts, during which lowPriority sounds are blocked from playing at
+-- all. This is what stops a filler from overlapping a normal/force sound that
+-- has no explicit protect, without making normal sounds unable to cut each
+-- other (which giving them all a real protect would do).
+local MKE_normalGraceUntil = 0
+local MKE_LOWPRIORITY_GRACE = 1.5
+
 local function CanPlay()
     local now = GetTime()
     if now < MKE_playLock then return false end
@@ -86,6 +94,15 @@ local function PlayRandom(category, force, protectDuration, lowPriority)
         end
     end
 
+    -- lowPriority-only grace check: blocks a filler from starting while a
+    -- normal/force sound is still within its short grace window, without
+    -- giving that normal/force sound a real protect (which would also stop
+    -- it from being cut by another normal sound).
+    if lowPriority and now < MKE_normalGraceUntil then
+        MKE_Debug("[" .. category .. "] blocked: normal/force grace window active")
+        return
+    end
+
     local sounds = MKE_Sounds[category]
     if not sounds or #sounds == 0 then return end
 
@@ -116,6 +133,9 @@ local function PlayRandom(category, force, protectDuration, lowPriority)
     MKE_currentHandle  = (ok and success) and handle or nil
     MKE_currentIsForce = force or false
     MKE_currentIsLowPriority = (not force) and lowPriority or false
+    if not lowPriority then
+        MKE_normalGraceUntil = now + MKE_LOWPRIORITY_GRACE
+    end
     local effectiveProtect = chosenProtect or protectDuration
     if effectiveProtect then MKE_playLock = now + effectiveProtect end
 end
@@ -133,14 +153,8 @@ MKE_Sounds = {
         {"select_10.ogg", 1}, {"select_11.ogg", 1}, {"select_12.ogg", 1},
         {"select_13.ogg", 1},
     },
-    AGGRO       = {
-        {"aggro_1.ogg", 1}, {"aggro_2.ogg", 1}, {"aggro_3.ogg", 1},
-        {"aggro_4.ogg", 1}, {"aggro_5.ogg", 1}, {"aggro_6.ogg", 1},
-    },
-    LEAVECOMBAT = {
-        {"leavecombat_1.ogg", 1}, {"leavecombat_2.ogg", 1}, {"leavecombat_3.ogg", 1},
-        {"leavecombat_4.ogg", 1}, {"leavecombat_5.ogg", 1},
-    },
+    AGGRO       = { {"aggro_2.ogg", 1, 1.3} },
+    LEAVECOMBAT = { {"leavecombat_2.ogg", 1, 1.3} },
     DEATH       = {
         {"death_1.ogg", 1}, {"death_2.ogg", 1},
     },
@@ -174,7 +188,6 @@ MKE_Sounds = {
         {"touchofdeath_1.ogg", 1, 1.5}, {"touchofdeath_2.ogg", 1, 1.4}, {"touchofdeath_3.ogg", 1, 3.8},
     },
     TOUCH_OF_KARMA        = { {"touchofkarma_1.ogg", 1} },
-    RUSHING_WIND_KICK     = { {"rushingwindkick_1.ogg", 1} }, 
     STRIKES               = { {"sowl-wdp_1.ogg", 1} }, -- Strike of the Windlord + Whirling Dragon Punch
     ZENITH                = { {"zenith_1.ogg", 1, 2.7} }, -- protect = own runtime + buffer
     ZENITH_STOMP          = { {"zenitstomp_1.ogg", 1}, {"zenithstomp_2.ogg", 1} },
@@ -241,12 +254,12 @@ local SpellToSound = {
     -- Core rotational
     [100780] = { cat = "TIGER_PALM",          prob = 0.25, anyCombat = true, lowPriority = true },
     [100784] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true, lowPriority = true },
-    [107428] = { cat = "RISING_SUN_KICK",     prob = 0.25 , anyCombat = true , lowPriority = true },
+    [107428] = { cat = "BLACKOUT_KICK",       prob = 0.25 , anyCombat = true , lowPriority = true }, -- Rising Sun Kick, shares Blackout Kick's sound
     [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.25, anyCombat = true, lowPriority = true },
     [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, anyCombat = true ,lowPriority = true},
     [117952] = { cat = "CRACKLING_JADE",      prob = 1.0, anyCombat = true, lowPriority = true },
     [123986] = { cat = "CHI_BURST",           prob = 1.0, anyCombat = true , onCastStart = true  },
-    [467307] = { cat = "RUSHING_WIND_KICK",   prob = 1.0, probBySpec = { [270] = 0.3 }, anyCombat = true, lowPriority = true }, -- full chance on Windwalker, lower on Mistweaver; protect is now dynamic (per-file)
+    [467307] = { cat = "RISING_SUN_KICK",     prob = 1.0, probBySpec = { [270] = 0.3 }, anyCombat = true, lowPriority = true }, -- Rushing Wind Kick, shares Rising Sun Kick's sound; full chance on Windwalker, lower on Mistweaver
 
     -- Windwalker cooldowns / signatures
     [322109] = { cat = "TOUCH_OF_DEATH",   prob = 1.0, force = true, anyCombat = true }, -- protect is now dynamic (per-file)
