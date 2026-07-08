@@ -178,7 +178,7 @@ MKE_Sounds = {
 
     -- Spell categories
     TIGER_PALM            = { {"tigerpalm_1.ogg", 1} },
-    BLACKOUT_KICK         = { {"blackoutkick_1.ogg", 1} },
+    BLACKOUT_KICK         = { {"blackoutkick-risingsunkick_1.ogg", 1} }, -- shared: Blackout Kick + Rising Sun Kick
     RISING_SUN_KICK       = { {"risingsunkick_1.ogg", 1} },
     SPINNING_CRANE_KICK   = { {"spinningcranekick_1.ogg", 1} },
     FISTS_OF_FURY         = { {"fistsoffury_1.ogg", 1} },
