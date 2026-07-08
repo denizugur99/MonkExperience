@@ -185,7 +185,6 @@ MKE_Sounds = {
 
     -- Movement / utility (out of combat)
     ROLL          = { {"roll_1.ogg", 1} },
-    CHI_TORPEDO   = { {"chitorpedo_1.ogg", 1} },
     TIGERS_LUST   = { {"tigerslust_1.ogg", 1} },
     TRANSCENDENCE = { {"transcendence_1.ogg", 1} },
     TRANS_TRANSFER = { {"transcendenceTeleport_1.ogg", 1} },
@@ -269,7 +268,7 @@ local SpellToSound = {
 
     -- Movement / utility
     [109132] = { cat = "ROLL",           prob = 1.0, anyCombat = true }, -- Roll
-    [115008] = { cat = "CHI_TORPEDO",    prob = 1.0, anyCombat = true }, -- Chi Torpedo
+    [115008] = { cat = "ROLL",           prob = 1.0, anyCombat = true }, -- Chi Torpedo, shares Roll's sound
     [116841] = { cat = "TIGERS_LUST",    prob = 1.0, anyCombat = true }, -- Tiger's Lust
     [101643] = { cat = "TRANSCENDENCE",  prob = 1.0, anyCombat = true }, -- Transcendence
     [119996] = { cat = "TRANS_TRANSFER", prob = 1.0, anyCombat = true }, -- Transcendence: Transfer
@@ -310,6 +309,7 @@ local SpellToSound = {
     -- Shared major-cooldown bundle; protect is now dynamic (per-file)
     [116680] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Thunder Focus Tea
     [322507] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Celestial Brew
+    [241059] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Celestial Infusion
 }
 
 -- Spell IDs whose FAILED/INTERRUPTED cast should trigger an interrupt-miss line.
