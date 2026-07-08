@@ -187,7 +187,7 @@ MKE_Sounds = {
     CRACKLING_JADE        = { {"cracklingjadelightning_1.ogg", 1} },
     CHI_BURST             = { {"chiburst_1.ogg", 1} },
     TOUCH_OF_DEATH        = { -- protect (3rd value) = each file's own runtime + small buffer
-        {"touchofdeath_1.ogg", 1, 1.5}, {"touchofdeath_2.ogg", 1, 1.4}, {"touchofdeath_3.ogg", 1, 3.8},
+        {"touchofdeath_2.ogg", 1, 1.4}
     },
     TOUCH_OF_KARMA        = { {"touchofkarma_1.ogg", 1} },
     STRIKES               = { {"sowl-wdp_1.ogg", 1} }, -- Strike of the Windlord + Whirling Dragon Punch
