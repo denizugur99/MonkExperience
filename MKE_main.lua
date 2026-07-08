@@ -148,13 +148,13 @@ MKE_Sounds = {
     LOGIN       = { {"login_1.ogg", 1, 11.2} }, -- protect = own runtime + buffer
     SELECT      = {
         {"select_1.ogg", 1}, {"select_2.ogg", 1}, {"select_3.ogg", 1},
-        {"select_4.ogg", 1}, {"select_5.ogg", 1}, {"select_6.ogg", 1},
+         {"select_5.ogg", 1}, {"select_6.ogg", 1},
         {"select_7.ogg", 1}, {"select_8.ogg", 1}, {"select_9.ogg", 1},
         {"select_10.ogg", 1}, {"select_11.ogg", 1}, {"select_12.ogg", 1},
         {"select_13.ogg", 1},
     },
-    AGGRO       = { {"aggro_2.ogg", 1, 1.3} },
-    LEAVECOMBAT = { {"leavecombat_2.ogg", 1, 1.3} },
+    AGGRO       = { {"aggro_2.ogg", 1} },
+    LEAVECOMBAT = { {"leavecombat_2.ogg", 1} },
     DEATH       = {
         {"death_1.ogg", 1}, {"death_2.ogg", 1},
     },
@@ -166,20 +166,22 @@ MKE_Sounds = {
     MOUNT       = {
         {"mount_1.ogg", 1}, {"mount_3.ogg", 1}, {"mount_4.ogg", 1},
         {"mount_5.ogg", 1}, {"mount_6.ogg", 1}, {"mount_7.ogg", 1},
-        {"mount_8.ogg", 1}, {"mount_9.ogg", 1}, {"mount_10.ogg", 1},
+        {"mount_8.ogg", 1}, {"mount_10.ogg", 1},
         {"mount_11.ogg", 1}, {"mount_12.ogg", 1},
     },
     AFK_START   = { {"afkstart_1.ogg", 1} }, -- stinger, always plays first
-    AFK_MUSIC   = { -- random music bed, plays right after the stinger
-        {"afkmusic_1.mp3", 1}, {"afkmusic_2.mp3", 1}, {"afkmusic_3.mp3", 1},
-        {"afkmusic_4.mp3", 1}, {"afkmusic_5.mp3", 1},
+    AFK_MUSIC   = { -- random music bed, plays right after the stinger, loops while still AFK
+        -- 3rd value = each file's own runtime + small buffer, used to schedule the next loop iteration
+        {"afkmusic_1.mp3", 1, 52.0}, {"afkmusic_2.mp3", 1, 87.7}, {"afkmusic_3.mp3", 1, 54.6},
+        {"afkmusic_4.mp3", 1, 49.9}, {"afkmusic_5.mp3", 1, 82.0},
     },
-    AFK_END     = { {"afkend_1.ogg", 1} },
+    AFK_END     = { {"afkend_1.ogg", 1, 7} },
 
     -- Spell categories
     TIGER_PALM            = { {"tigerpalm_1.ogg", 1} },
-    BLACKOUT_KICK         = { {"blackoutkick-risingsunkick_1.ogg", 1} }, -- shared: Blackout Kick + Rising Sun Kick
-    RISING_SUN_KICK       = { {"risingsunkick_1.ogg", 1} },
+    BLACKOUT_KICK         = { {"blackoutkick.ogg", 1} },
+    RISING_SUN_KICK       = { {"risingsunkick_2.ogg", 1} },
+    RUSHING_WIND_KICK     = { {"risingsunkick_1.ogg", 1} },
     SPINNING_CRANE_KICK   = { {"spinningcranekick_1.ogg", 1} },
     FISTS_OF_FURY         = { {"fistsoffury_1.ogg", 1} },
     CRACKLING_JADE        = { {"cracklingjadelightning_1.ogg", 1} },
@@ -193,7 +195,7 @@ MKE_Sounds = {
     ZENITH_STOMP          = { {"zenitstomp_1.ogg", 1}, {"zenithstomp_2.ogg", 1} },
     CELESTIAL_CONDUIT     = { {"celestialconduit_1.ogg", 1, 4.9} }, -- protect = own runtime + buffer
     CELESTIAL_SUMMON      = { {"chiji-yulon-blackox-whitetiger_1.ogg", 1, 2.1} }, -- protect = own runtime + buffer
-    FLYING_SERPENT_KICK   = { {"flyingserpentkick-slicingwinds_1.ogg", 1} },
+    FLYING_SERPENT_KICK   = { {"flyingserpentkick-slicingwinds_1.ogg", 1}, {"flyingserpentkick-slicingwinds_2.ogg", 1} }, -- shared: Flying Serpent Kick + Slicing Winds
     GRAPPLE_WEAPON        = { {"grappleweapon_1.ogg", 1} },
 
     -- Movement / utility (out of combat)
@@ -254,12 +256,12 @@ local SpellToSound = {
     -- Core rotational
     [100780] = { cat = "TIGER_PALM",          prob = 0.25, anyCombat = true, lowPriority = true },
     [100784] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true, lowPriority = true },
-    [107428] = { cat = "BLACKOUT_KICK",       prob = 0.25 , anyCombat = true , lowPriority = true }, -- Rising Sun Kick, shares Blackout Kick's sound
+    [107428] = { cat = "RISING_SUN_KICK",     prob = 0.25 , anyCombat = true , lowPriority = true },
     [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.25, anyCombat = true, lowPriority = true },
     [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, anyCombat = true ,lowPriority = true},
     [117952] = { cat = "CRACKLING_JADE",      prob = 1.0, anyCombat = true, lowPriority = true },
     [123986] = { cat = "CHI_BURST",           prob = 1.0, anyCombat = true , onCastStart = true  },
-    [467307] = { cat = "RISING_SUN_KICK",     prob = 1.0, probBySpec = { [270] = 0.3 }, anyCombat = true, lowPriority = true }, -- Rushing Wind Kick, shares Rising Sun Kick's sound; full chance on Windwalker, lower on Mistweaver
+    [467307] = { cat = "RUSHING_WIND_KICK",   prob = 1.0, probBySpec = { [270] = 0.3 }, anyCombat = true, lowPriority = true }, -- full chance on Windwalker, lower on Mistweaver
 
     -- Windwalker cooldowns / signatures
     [322109] = { cat = "TOUCH_OF_DEATH",   prob = 1.0, force = true, anyCombat = true }, -- protect is now dynamic (per-file)
@@ -312,10 +314,11 @@ local SpellToSound = {
     [115151] = { cat = "RENEWING_MIST", prob = 0.25, anyCombat = true, lowPriority = true },
     [115175] = { cat = "SOOTHING_MIST", prob = 1.0, anyCombat = true },
     [197908] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true },
-    [115294] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true, onCastStart = true }, -- Mana Tea, plays on cast start
+    [115294] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true }, -- Mana Tea; instant cast, fires on succeeded (no UNIT_SPELLCAST_START for instants)
+    [115869] = { cat = "MANA_TEA",      prob = 1.0, anyCombat = true }, -- Mana Tea (alt ID); instant cast, fires on succeeded
     [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, anyCombat = true }, -- Life Cocoon; protect is now dynamic (per-file)
     [115313] = { cat = "STATUE_SUMMON", prob = 1.0, anyCombat = true }, -- Summon Jade Serpent Statue
-    [115310] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival, AoE (plays when cast begins)
+    [115310] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true}, -- Revival, AoE (plays when cast begins)
     [388615] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true}, -- Restoral, shares Revival's file/bucket
     [115178] = { cat = "RESUSCITATE_CAST", prob = 1.0, anyCombat = true, onCastStart = true }, -- Resuscitate, single-target (plays when cast begins)
     [212051] = { cat = "REAWAKEN",         prob = 1.0, anyCombat = true, onCastStart = true }, -- Reawaken, mass out-of-combat rez
@@ -323,7 +326,7 @@ local SpellToSound = {
     -- Shared major-cooldown bundle; protect is now dynamic (per-file)
     [116680] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Thunder Focus Tea
     [322507] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Celestial Brew
-    [241059] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Celestial Infusion
+    [1241059] = { cat = "MAJOR_COOLDOWN", prob = 1.0, force = true, anyCombat = true }, -- Celestial Infusion
 }
 
 -- Spell IDs whose FAILED/INTERRUPTED cast should trigger an interrupt-miss line.
@@ -333,6 +336,11 @@ local InterruptFailSpells = {
 
 local INTERRUPT_FAIL_CD = 5 -- own cooldown, independent of the protect-lock system
 local interruptFailLastPlayed = 0
+
+local AGGRO_CD = 20 -- own cooldown, independent of the protect-lock system
+local aggroLastPlayed = 0
+local LEAVECOMBAT_CD = 20 -- own cooldown, independent of the protect-lock system
+local leaveCombatLastPlayed = 0
 
 -- Monk spec IDs: 268 Brewmaster, 270 Mistweaver, 269 Windwalker
 local function CurrentSpecID()
@@ -348,8 +356,14 @@ local function HandleResolvedSpell(spellID, fromCastStart)
         MKE_Debug("unmapped spellID=" .. tostring(spellID) .. (fromCastStart and " (castStart)" or " (succeeded)"))
         return
     end
-    if fromCastStart and not cfg.onCastStart then return end
-    if not fromCastStart and cfg.onCastStart then return end
+    if fromCastStart and not cfg.onCastStart then
+        MKE_Debug("spell=" .. tostring(spellID) .. " skipped: castStart event, cfg wants succeeded")
+        return
+    end
+    if not fromCastStart and cfg.onCastStart then
+        MKE_Debug("spell=" .. tostring(spellID) .. " skipped: succeeded event, cfg wants castStart (likely an instant-cast spell that never fires UNIT_SPELLCAST_START)")
+        return
+    end
     if cfg.requiresSpell and not IsPlayerSpell(cfg.requiresSpell) then return end
     if not cfg.anyCombat and not InCombatLockdown() then
         MKE_Debug("spell=" .. tostring(spellID) .. " skipped: out of combat")
@@ -385,14 +399,31 @@ local POLL           = 0.2
 
 local AFK_STINGER_DURATION = 3.8 -- afkstart_1.ogg runtime (~3.76s) + small buffer
 
+local function IsStillAFK()
+    local ok, isAFK = pcall(function()
+        return UnitIsAFK("player") and true or false
+    end)
+    return ok and isAFK
+end
+
 local function PlayAFKMusic()
     if not MKE_soundEnabled then return end
     local pool = MKE_Sounds.AFK_MUSIC
-    local chosen = RollSound(pool, "AFK_MUSIC")
+    local chosen, chosenDuration = RollSound(pool, "AFK_MUSIC")
     MKE_lastPlayed.AFK_MUSIC = chosen
     local ok, success, handle = pcall(PlaySoundFile, ADDON_PATH .. chosen, "Dialog")
     afkSoundHandle = (ok and success) and handle or nil
     MKE_Debug("AFK music playing: " .. chosen)
+
+    -- Loop: when this track's own runtime elapses, play another random one,
+    -- as long as we're still AFK. Re-checked each time so the loop stops
+    -- naturally on return from AFK instead of running forever.
+    afkMusicTimer = C_Timer.NewTimer(chosenDuration or 60, function()
+        afkMusicTimer = nil
+        if IsStillAFK() then
+            PlayAFKMusic()
+        end
+    end)
 end
 
 local function PlayAFKStart()
@@ -406,10 +437,7 @@ local function PlayAFKStart()
 
     afkMusicTimer = C_Timer.NewTimer(AFK_STINGER_DURATION, function()
         afkMusicTimer = nil
-        local ok2, shouldPlay = pcall(function()
-            return UnitIsAFK("player") and true or false
-        end)
-        if ok2 and shouldPlay then
+        if IsStillAFK() then
             PlayAFKMusic()
         end
     end)
@@ -473,10 +501,24 @@ frame:SetScript("OnUpdate", function(_, elapsed)
     local inCombat = InCombatLockdown()
     if inCombat and not prevCombat then
         MKE_Debug("state: ENTER COMBAT")
-        PlayRandom("AGGRO")
+        local nowAggro = GetTime()
+        if nowAggro - aggroLastPlayed >= AGGRO_CD then
+            aggroLastPlayed = nowAggro
+            PlayRandom("AGGRO", false, nil, true)
+        else
+            MKE_Debug("AGGRO blocked (own 20s CD)")
+        end
     elseif not inCombat and prevCombat then
         MKE_Debug("state: LEAVE COMBAT")
-        if not isDead then PlayRandom("LEAVECOMBAT") end
+        if not isDead then
+            local nowLeave = GetTime()
+            if nowLeave - leaveCombatLastPlayed >= LEAVECOMBAT_CD then
+                leaveCombatLastPlayed = nowLeave
+                PlayRandom("LEAVECOMBAT", false, nil, true)
+            else
+                MKE_Debug("LEAVECOMBAT blocked (own 20s CD)")
+            end
+        end
     end
     prevCombat = inCombat
 
@@ -509,7 +551,7 @@ frame:SetScript("OnUpdate", function(_, elapsed)
             afkMusicTimer = nil
         end
         if afkSoundHandle then
-            pcall(StopSound, afkSoundHandle)
+            pcall(StopSound, afkSoundHandle, 0)
             afkSoundHandle = nil
         end
         PlayRandom("AFK_END", true)
