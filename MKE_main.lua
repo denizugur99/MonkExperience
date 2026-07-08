@@ -256,6 +256,7 @@ local SpellToSound = {
     -- Core rotational
     [100780] = { cat = "TIGER_PALM",          prob = 0.25, anyCombat = true, lowPriority = true },
     [100784] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true, lowPriority = true },
+    [205523] = { cat = "BLACKOUT_KICK",       prob = 0.25, anyCombat = true, lowPriority = true }, -- Blackout Kick (Brewmaster), shares Blackout Kick's sound
     [107428] = { cat = "RISING_SUN_KICK",     prob = 0.25 , anyCombat = true , lowPriority = true },
     [101546] = { cat = "SPINNING_CRANE_KICK", prob = 0.25, anyCombat = true, lowPriority = true },
     [113656] = { cat = "FISTS_OF_FURY",       prob = 1.0, anyCombat = true ,lowPriority = true},
@@ -294,11 +295,13 @@ local SpellToSound = {
     [119381] = { cat = "LEG_SWEEP",     prob = 1.0, anyCombat = true },
     [116844] = { cat = "RING_OF_PEACE", prob = 1.0, anyCombat = true },
     [198898] = { cat = "RING_OF_PEACE", prob = 1.0, anyCombat = true, onCastStart = true }, -- Song of Chi-Ji, shares Ring of Peace's sound
+    [202370] = { cat = "RING_OF_PEACE", prob = 1.0, anyCombat = true }, -- Mighty Ox Kick, Brewmaster PvP talent, shares Ring of Peace's sound
     [116095] = { cat = "DISABLE",       prob = 1.0, anyCombat = true, lowPriority = true },
     [218164] = { cat = "DETOX",         prob = 1.0, anyCombat = true },
     [115450] = { cat = "DETOX",         prob = 1.0, anyCombat = true }, -- Mistweaver Detox, shares Detox's sound
     [322101] = { cat = "EXPEL_HARM",    prob = 1.0, anyCombat = true },
     [115546] = { cat = "TAUNT",         prob = 1.0, anyCombat = true }, -- Provoke
+    [207025] = { cat = "TAUNT",         prob = 1.0, anyCombat = true }, -- Admonishment, Brewmaster PvP talent, shares Taunt's sound
     [116705] = { cat = "INTERRUPT",     prob = 1.0, anyCombat = true }, -- Spear Hand Strike (success)
 
     -- Brewmaster
