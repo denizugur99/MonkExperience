@@ -218,8 +218,7 @@ MKE_Sounds = {
         {"taunt_7.ogg", 1},
     },
     INTERRUPT   = { -- Spear Hand Strike
-        {"interrupt_1.ogg", 1}, {"interrupt_2.ogg", 1}, {"interrupt_3.ogg", 1},
-        {"interrupt_4.ogg", 1},
+         {"interrupt_2.ogg", 1}, {"interrupt_4.ogg", 1}
     },
     INTERRUPT_FAIL = { {"interruptfail_1.ogg", 1}, {"interruptfail_2.ogg", 1} },
 
