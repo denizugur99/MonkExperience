@@ -93,19 +93,22 @@ local function PlayRandom(category, force, protectDuration, lowPriority)
     MKE_lastPlayed[category] = chosen
 
     -- Force: stop whatever is playing and clear the protect lock.
-    -- Low-priority (spammy fillers like Tiger Palm/Blackout Kick): never cuts
-    -- anything except another low-priority sound — so it can't interrupt
-    -- Leg Sweep etc., but two fillers still cut each other like force does.
+    -- Low-priority: only stops another currently-playing low-priority sound
+    -- (never a force/normal one) — so two fillers still cut each other, but
+    -- neither can interrupt Leg Sweep/Interrupt/etc. StopSound is called with
+    -- an explicit 0ms fadeout so the cut is immediate, not a crossfade — a
+    -- default/omitted fadeout was the actual cause of audible overlap between
+    -- back-to-back fillers.
     -- Normal (non-force, non-low-priority): cuts any other non-force sound.
     if force then
-        if MKE_currentHandle then pcall(StopSound, MKE_currentHandle) end
+        if MKE_currentHandle then pcall(StopSound, MKE_currentHandle, 0) end
         MKE_playLock = 0
     elseif lowPriority then
         if MKE_currentIsLowPriority and MKE_currentHandle then
-            pcall(StopSound, MKE_currentHandle)
+            pcall(StopSound, MKE_currentHandle, 0)
         end
     elseif not MKE_currentIsForce and MKE_currentHandle then
-        pcall(StopSound, MKE_currentHandle)
+        pcall(StopSound, MKE_currentHandle, 0)
     end
 
     MKE_Debug("[" .. category .. "] playing: " .. chosen)
@@ -171,7 +174,7 @@ MKE_Sounds = {
         {"touchofdeath_1.ogg", 1, 1.5}, {"touchofdeath_2.ogg", 1, 1.4}, {"touchofdeath_3.ogg", 1, 3.8},
     },
     TOUCH_OF_KARMA        = { {"touchofkarma_1.ogg", 1} },
-    RUSHING_WIND_KICK     = { {"rushingwindkick_1.ogg", 1, 1.5} }, -- protect = own runtime + buffer
+    RUSHING_WIND_KICK     = { {"rushingwindkick_1.ogg", 1} }, 
     STRIKES               = { {"sowl-wdp_1.ogg", 1} }, -- Strike of the Windlord + Whirling Dragon Punch
     ZENITH                = { {"zenith_1.ogg", 1, 2.7} }, -- protect = own runtime + buffer
     ZENITH_STOMP          = { {"zenitstomp_1.ogg", 1}, {"zenithstomp_2.ogg", 1} },
@@ -212,12 +215,12 @@ MKE_Sounds = {
     PURIFYING_BREW = { {"purifyingbrew_1.ogg", 1}, {"purifyingbrew_2.ogg", 1}, {"purifyingbrew_3.ogg", 1} },
     FORTIFYING_BREW = { {"fortifyingbrew_1.ogg", 1, 2.5} }, -- protect = own runtime + buffer
     BLACK_OX_BREW  = { {"blackoxbrew_1.ogg", 1} },
-    EXPLODING_KEG  = { {"explodingkeg_1.ogg", 1}, {"explodingkeg_2.ogg", 1} },
+    EXPLODING_KEG  = { {"explodingkeg_1.ogg", 1, 4.4}, {"explodingkeg_2.ogg", 1, 2.7} }, -- protect = own runtime + buffer
 
     -- Mistweaver
     RENEWING_MIST = { {"renewingmist_1.ogg", 1}, {"renewingmist_2.ogg", 1} },
     SOOTHING_MIST = { {"soothingmist_1.ogg", 1}, {"soothingmist_2.ogg", 1} },
-    MANA_TEA      = { {"manatea_1.ogg", 1}, {"manatea_2.ogg", 1} },
+    MANA_TEA      = { {"manatea_1.ogg", 1} },
     LIFE_COCOON   = { {"chicacoon_1.ogg", 1, 2.6} }, -- protect = own runtime + buffer
     STATUE_SUMMON = { {"mw-bmstatue_1.ogg", 1} },
     REVIVAL_CAST     = { {"revival-restoral_1.ogg", 1} }, -- Revival + Restoral: the AoE raid-cooldown resurrection
@@ -276,8 +279,10 @@ local SpellToSound = {
     [115078] = { cat = "PARALYSIS",     prob = 1.0, anyCombat = true },
     [119381] = { cat = "LEG_SWEEP",     prob = 1.0, anyCombat = true },
     [116844] = { cat = "RING_OF_PEACE", prob = 1.0, anyCombat = true },
-    [116095] = { cat = "DISABLE",       prob = 1.0, anyCombat = true },
+    [198898] = { cat = "RING_OF_PEACE", prob = 1.0, anyCombat = true, onCastStart = true }, -- Song of Chi-Ji, shares Ring of Peace's sound
+    [116095] = { cat = "DISABLE",       prob = 1.0, anyCombat = true, lowPriority = true },
     [218164] = { cat = "DETOX",         prob = 1.0, anyCombat = true },
+    [115450] = { cat = "DETOX",         prob = 1.0, anyCombat = true }, -- Mistweaver Detox, shares Detox's sound
     [322101] = { cat = "EXPEL_HARM",    prob = 1.0, anyCombat = true },
     [115546] = { cat = "TAUNT",         prob = 1.0, anyCombat = true }, -- Provoke
     [116705] = { cat = "INTERRUPT",     prob = 1.0, anyCombat = true }, -- Spear Hand Strike (success)
@@ -288,7 +293,7 @@ local SpellToSound = {
     [119582] = { cat = "PURIFYING_BREW",  prob = 1.0, anyCombat = true },
     [115203] = { cat = "FORTIFYING_BREW", prob = 1.0, force = true, anyCombat = true }, -- protect is now dynamic (per-file)
     [115399] = { cat = "BLACK_OX_BREW",   prob = 1.0, anyCombat = true },
-    [325153] = { cat = "EXPLODING_KEG",   prob = 1.0, anyCombat = true },
+    [325153] = { cat = "EXPLODING_KEG",   prob = 1.0, force = true, anyCombat = true }, -- protect is dynamic (per-file)
     [115315] = { cat = "STATUE_SUMMON",   prob = 1.0, anyCombat = true }, -- Summon Black Ox Statue
 
     -- Mistweaver
@@ -298,7 +303,7 @@ local SpellToSound = {
     [116849] = { cat = "LIFE_COCOON",   prob = 1.0, force = true, anyCombat = true }, -- Life Cocoon; protect is now dynamic (per-file)
     [115313] = { cat = "STATUE_SUMMON", prob = 1.0, anyCombat = true }, -- Summon Jade Serpent Statue
     [115310] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Revival, AoE (plays when cast begins)
-    [388615] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true, onCastStart = true }, -- Restoral, shares Revival's file/bucket
+    [388615] = { cat = "REVIVAL_CAST",     prob = 1.0, anyCombat = true}, -- Restoral, shares Revival's file/bucket
     [115178] = { cat = "RESUSCITATE_CAST", prob = 1.0, anyCombat = true, onCastStart = true }, -- Resuscitate, single-target (plays when cast begins)
     [212051] = { cat = "REAWAKEN",         prob = 1.0, anyCombat = true, onCastStart = true }, -- Reawaken, mass out-of-combat rez
 
@@ -454,10 +459,10 @@ frame:SetScript("OnUpdate", function(_, elapsed)
     local inCombat = InCombatLockdown()
     if inCombat and not prevCombat then
         MKE_Debug("state: ENTER COMBAT")
-        if math.random() < 0.5 then PlayRandom("AGGRO") end
+        PlayRandom("AGGRO")
     elseif not inCombat and prevCombat then
         MKE_Debug("state: LEAVE COMBAT")
-        if not isDead and math.random() < 0.5 then PlayRandom("LEAVECOMBAT") end
+        if not isDead then PlayRandom("LEAVECOMBAT") end
     end
     prevCombat = inCombat
 
